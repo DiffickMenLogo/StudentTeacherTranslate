@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Translator from '../../components/Translator/Translator';
-import { IBook } from '../../types/Book';
+import { IAuthor, IBook } from '../../types/Book';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { FaTrash } from 'react-icons/fa'; // import delete icon
@@ -93,21 +93,50 @@ const BookText = styled.div`
 interface TopicProps {
   books: IBook[];
   isAuth: boolean;
+  authors: IAuthor[];
+  setBooks: React.Dispatch<React.SetStateAction<IBook[]>>;
+  setAuthors: React.Dispatch<React.SetStateAction<IAuthor[]>>;
 }
 
-const TopicPage = ({ books, isAuth }: TopicProps) => {
+const TopicPage = ({
+  books,
+  isAuth,
+  setBooks,
+  setAuthors,
+  authors,
+}: TopicProps) => {
   const navigate = useNavigate();
   const id = window.location.href.split('/')[4];
   const book = books.find((book) => book._id === id);
 
   const [text, setText] = useState('');
 
+  function removeById() {
+    const newBooks = books;
+    for (let i = 0; i < newBooks.length; i++) {
+      if (newBooks[i]._id === id) {
+        newBooks.splice(i, 1);
+        break;
+      }
+    }
+    setBooks(books);
+  }
+
+  function removeAuthorIfNoBooks(author: string) {
+    const existBooks = books.filter((book) => book.author === author);
+    if (existBooks.length == 0) {
+      const newAuthors = authors.filter((aut) => aut.name !== author);
+      setAuthors(newAuthors);
+    }
+  }
+
   async function handleDeleteBook(e: any) {
     axios
       .delete(`${API_HTTP}/books/${id}`)
       .then(function (response) {
         console.log('Successfully deleted data:', response.data);
-        setBook((prevBooks: IBook[]) => {
+        removeAuthorIfNoBooks(response.data.author);
+        setBooks((prevBooks: IBook[]) => {
           const newBooks = prevBooks.filter((book) => book._id !== id);
           return newBooks;
         });
@@ -115,6 +144,7 @@ const TopicPage = ({ books, isAuth }: TopicProps) => {
       .catch(function (error) {
         console.error('Error deleting data:', error);
       });
+    removeById();
     navigate('/');
   }
 
@@ -166,6 +196,3 @@ const TopicPage = ({ books, isAuth }: TopicProps) => {
 };
 
 export default TopicPage;
-function setBook(arg0: (prevBooks: IBook[]) => IBook[]) {
-  throw new Error('Function not implemented.');
-}

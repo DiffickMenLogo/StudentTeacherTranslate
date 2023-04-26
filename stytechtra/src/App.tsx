@@ -33,7 +33,15 @@ function App() {
         <Route path="/auth" element={<Auth setIsAuth={setIsAuth} />} />
         <Route
           path="/topic/:id"
-          element={<Topic isAuth={isAuth} books={books} />}
+          element={
+            <Topic
+              isAuth={isAuth}
+              books={books}
+              authors={authors}
+              setBooks={setBooks}
+              setAuthors={setAuthors}
+            />
+          }
         />
         <Route
           path="/addpost"
