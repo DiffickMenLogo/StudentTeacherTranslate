@@ -31,7 +31,10 @@ function App() {
           }
         />
         <Route path="/auth" element={<Auth setIsAuth={setIsAuth} />} />
-        <Route path="/topic/:id" element={<Topic books={books} />} />
+        <Route
+          path="/topic/:id"
+          element={<Topic isAuth={isAuth} books={books} />}
+        />
         <Route
           path="/addpost"
           element={<AddPostForm setBooks={setBooks} setAuthors={setAuthors} />}

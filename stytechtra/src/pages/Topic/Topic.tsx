@@ -3,6 +3,9 @@ import Translator from '../../components/Translator/Translator';
 import { IBook } from '../../types/Book';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { FaTrash } from 'react-icons/fa'; // import delete icon
+import axios from 'axios';
+import { API_HTTP } from '../../constants';
 
 const Container = styled.div`
   display: flex;
@@ -14,7 +17,6 @@ const Container = styled.div`
 
 const Header = styled.header`
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 16px;
 `;
@@ -88,21 +90,33 @@ const BookText = styled.div`
     }
   }
 `;
+interface TopicProps {
+  books: IBook[];
+  isAuth: boolean;
+}
 
-const TopicPage = ({ books }: { books: IBook[] }) => {
+const TopicPage = ({ books, isAuth }: TopicProps) => {
   const navigate = useNavigate();
   const id = window.location.href.split('/')[4];
   const book = books.find((book) => book._id === id);
 
   const [text, setText] = useState('');
 
-  // const handleSelection = () => {
-  //   const selectedText = document.getSelection()?.toString().trim() || '';
-  //   if (selectedText !== '') {
-  //     setText(selectedText);
-  //   }
-  // };
-  // document.addEventListener('mouseup', handleSelection);
+  async function handleDeleteBook(e: any) {
+    axios
+      .delete(`${API_HTTP}/books/${id}`)
+      .then(function (response) {
+        console.log('Successfully deleted data:', response.data);
+        setBook((prevBooks: IBook[]) => {
+          const newBooks = prevBooks.filter((book) => book._id !== id);
+          return newBooks;
+        });
+      })
+      .catch(function (error) {
+        console.error('Error deleting data:', error);
+      });
+    navigate('/');
+  }
 
   const handleAddText = (e: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
     setText(text + e.currentTarget.innerText);
@@ -112,6 +126,20 @@ const TopicPage = ({ books }: { books: IBook[] }) => {
     <Container>
       <Header>
         <HomeLink onClick={() => navigate('/')}>Home</HomeLink>
+        <div style={{ marginLeft: 'auto' }}>
+          {isAuth ? (
+            <FaTrash
+              onClick={(e) => handleDeleteBook(e)}
+              style={{
+                color: 'red',
+                cursor: 'pointer',
+                margin: '0 20px',
+              }}
+            />
+          ) : (
+            ''
+          )}
+        </div>
       </Header>
       <Title>{book?.title}</Title>
       <MainSection>
@@ -138,3 +166,6 @@ const TopicPage = ({ books }: { books: IBook[] }) => {
 };
 
 export default TopicPage;
+function setBook(arg0: (prevBooks: IBook[]) => IBook[]) {
+  throw new Error('Function not implemented.');
+}
